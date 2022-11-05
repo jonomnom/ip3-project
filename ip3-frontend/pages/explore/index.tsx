@@ -70,7 +70,7 @@ export default function ExplorePage({ nfts }: Props) {
   )
 
   return (
-    <div className="relative -top-[140px] w-full pb-10">
+    <div className="relative w-full pb-10">
       <Banner
         title="Explore"
         subtitle="Receive authorization from world famous IPs "
