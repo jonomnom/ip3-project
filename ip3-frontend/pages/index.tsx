@@ -14,14 +14,14 @@ export default function Home({}: Props) {
   const { isConnected, address } = useAccount()
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-white">
+    <div className="relative h-screen w-screen overflow-hidden bg-white font-title">
       <div className="flex h-screen w-full">
         <div className="relative flex flex-1 items-center justify-center bg-black">
           <div className="group relative flex flex-col items-center">
             <div className="relative group-hover:-top-24">
               <Link href="/auth/assets" passHref>
                 <div className="relative rounded-full bg-white px-20 py-10 text-black group-hover:scale-75">
-                  <div className="text-8xl font-bold tracking-wider text-black">
+                  <div className=" text-8xl font-bold tracking-wider text-black">
                     RENT
                   </div>
                 </div>
@@ -44,7 +44,7 @@ export default function Home({}: Props) {
                   </div>
                 </div>
                 <div className="hidden whitespace-pre-line text-center text-black group-hover:block">
-                  {`explore and rent your \n favorite NFTs for exhibitions \n or commercial use`}
+                  {`List your NFTs for rent and \n earn tokens today`}
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import WalletConnectButtonGroup from '../WalletConnectButtonGroup'
 import { Navbar, Link, Text, Avatar, Dropdown } from '@nextui-org/react'
+import Image from 'next/image'
 
 interface Props {
   className?: string
@@ -48,8 +49,17 @@ const IP3Navbar: FC<Props> = ({ className }) => {
             },
           }}
         >
-          <AcmeLogo />
-          <Text b color="inherit" hideIn="xs">
+          <Link href="/">
+            <Image
+              src={'/logo-white.png'}
+              width={48}
+              height={48}
+              layout="intrinsic"
+              objectFit="contain"
+              alt="ip3-logo.png"
+            />
+          </Link>
+          <Text b color="inherit" hideIn="xs" className="pl-2">
             IP3
           </Text>
         </Navbar.Brand>
