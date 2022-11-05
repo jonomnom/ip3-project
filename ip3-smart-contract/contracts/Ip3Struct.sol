@@ -3,8 +3,7 @@ pragma solidity ^0.8.9;
 
 enum RentalType {
     DurationOnly,
-    CountOnly,
-    BothSupported
+    CountOnly
 }
 
 struct Authorizer {
@@ -18,6 +17,7 @@ struct NFT {
     address NFTAddress;
     string tokenId;
     uint256 currentPrice;
+    uint256 lastActive; // last active timestamp
 }
 
 struct AuthorizedNFT {
