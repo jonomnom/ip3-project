@@ -58,11 +58,11 @@ const WalletConnectButtonGroup: FC<Props> = () => {
   return (
     <div className="flex gap-2">
       <ConnectButton showBalance={false} />
-      {status === 'unauthenticated' && isConnected && (
+      {/* {status === 'unauthenticated' && isConnected && (
         <button className="bg-cyan-500 px-2 py-1" onClick={() => handleAuth()}>
           Verify
         </button>
-      )}
+      )} */}
     </div>
   )
 }

@@ -142,17 +142,6 @@ export default function DigitalIPCard({ nft }: Props) {
           <button className=" mt-4 flex items-center justify-center place-self-center rounded-2xl bg-black px-4 font-title text-sm text-white">
             Authorize
           </button>
-          {/* <Button
-            color="gradient"
-            auto
-            onClick={() => {
-              push(
-                `/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}/lend`
-              )
-            }}
-          >
-            Lend
-          </Button> */}
         </div>
       </div>
     </div>
