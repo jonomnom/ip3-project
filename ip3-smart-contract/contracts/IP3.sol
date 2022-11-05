@@ -3,8 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/Math.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Ip3Struct.sol";
 
 interface IERC20 {
@@ -21,6 +20,7 @@ interface IERC20 {
  *@notice Contract demo
  */
 contract IP3 {
+    using SafeMath for uint256;
     /*//////////////////////////////////////////////////////////////
                            PRICING PARAMETERS
     //////////////////////////////////////////////////////////////*/
@@ -66,7 +66,7 @@ contract IP3 {
 
             // Countonly
         } else {
-            purchaseCount(_authorizedNFT, _term.count, msg.sender);
+            purchaseByAmount(_authorizedNFT, _term.count, msg.sender);
         }
     }
 
@@ -86,11 +86,14 @@ contract IP3 {
     ) private {
         // first get approved amount from USDT approve, then can purchase this
         bytes32 hashedAuthorizeNFT = hashAuthorizeNFT(_authorizedNFT);
-        
 
         //https://ethereum.stackexchange.com/questions/1511/how-to-initialize-a-struct
         Term memory newTerm = Term(0, 0, _count);
         bytes32 singature = hashedAuthorizeNFT; //TODO: authrizednft
+
+        //use IERC20 instance to perform the exchange here
+        uint256 termedPrice;
+
         AuthorizeCertificate
             memory newAuthorizeCertificate = AuthorizeCertificate(
                 _authorizedNFT,
@@ -117,14 +120,9 @@ contract IP3 {
 
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-
-
-        //use IERC20 instance to perform the exchange here
-        uint256 termedPrice;
         
         // get the current price
-        uint256 price = _authorizedNFT.nft.currentPrice;
-
+        uint256 price = _authorizedNFT.currentPrice;
 
         // put transfer at the end to prevent the reentry attack 
         if (price == 0) {
@@ -161,6 +159,10 @@ contract IP3 {
         //https://ethereum.stackexchange.com/questions/1511/how-to-initialize-a-struct
         Term memory newTerm = Term(_startTime, _endTime, 0);
         bytes32 singature = hashedAuthorizeNFT; // TODO: Tempoary set to be hashed NFT
+        
+        //use IERC20 instance to perform the exchange here
+        uint256 termedPrice;
+
         AuthorizeCertificate
             memory newAuthorizeCertificate = AuthorizeCertificate(
                 _authorizedNFT,
@@ -187,12 +189,9 @@ contract IP3 {
 
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-
-        //use IERC20 instance to perform the exchange here
-        uint256 termedPrice;
         
         // get the current price
-        uint256 price = _authorizedNFT.nft.currentPrice;
+        uint256 price = _authorizedNFT.currentPrice;
 
 
         // put transfer at the end to prevent the reentry attack 
@@ -234,7 +233,7 @@ contract IP3 {
                     _authorizedNFT.nft.chainId,
                     _authorizedNFT.nft.NFTAddress,
                     _authorizedNFT.nft.tokenId,
-                    _authorizedNFT.nft.currentPrice,
+                    _authorizedNFT.currentPrice,
                     _authorizedNFT.rentalType,
                     _authorizedNFT.authorizer.nftHolder,
                     _authorizedNFT.authorizer.claimAddress,
@@ -283,6 +282,6 @@ contract IP3 {
 
         // 1 erc 20 = 10**6
         uint256 floorPrice = 1*10**6;
-        return max(floorPrice, estimatePrice);
+        return estimatePrice >= floorPrice ? estimatePrice : floorPrice;
     }
 }
