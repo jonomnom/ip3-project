@@ -4,7 +4,7 @@
 // }
 
 export function parseAddressForShow(address: string) {
-  return `${address.slice(0, 4)}...${address.slice(-3)}`
+  return `${address.slice(0, 6)}...${address.slice(-6)}`
 }
 
 export function isSameAddress(address1: string, address2: string) {

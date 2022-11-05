@@ -1,4 +1,4 @@
-import { Button, Divider } from '@nextui-org/react'
+import { Avatar, Badge, Button, Divider } from '@nextui-org/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Checkbox, DateRangePicker } from 'rsuite'
@@ -6,7 +6,8 @@ import { RentableNFT } from '../../constant/types'
 import addDays from 'date-fns/addDays'
 import addMonths from 'date-fns/addMonths'
 import 'rsuite/dist/rsuite.css'
-
+import { useEnsAvatar, useEnsName } from 'wagmi'
+import { parseAddressForShow } from '@lib/utils'
 interface Props {
   nft: RentableNFT
 }
@@ -43,6 +44,14 @@ const { beforeToday } = DateRangePicker
 
 export default function DigitalIPCard({ nft }: Props) {
   const { push } = useRouter()
+  const { data: ensName } = useEnsName({
+    address: nft.autorizeIP.currentOwner,
+  })
+  console.log(ensName)
+  const avatar = useEnsAvatar({
+    addressOrName: ensName ?? '',
+  })
+
   return (
     <div className="relative z-10 w-full rounded-lg border border-black text-black">
       <Link
@@ -82,7 +91,16 @@ export default function DigitalIPCard({ nft }: Props) {
 
         <div className="pl-8">
           <div>Owner</div>
-          <div>xxx</div>
+          <div>
+            {avatar.data && <Avatar size="sm" src={avatar.data} />}
+            <Badge isSquared>
+              {ensName ? (
+                <div>{ensName}</div>
+              ) : (
+                <div> {parseAddressForShow(nft.autorizeIP.currentOwner)}</div>
+              )}
+            </Badge>
+          </div>
         </div>
       </div>
     </div>

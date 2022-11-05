@@ -15,7 +15,15 @@ import {
   Text,
 } from '@nextui-org/react'
 import { Filter2, Heart } from 'react-iconly'
-import DigitalIPCard from '@components/NFTCard/DigitalIPCard'
+import dynamic from 'next/dynamic'
+
+const DigitalIPCard = dynamic(
+  () => import('@components/NFTCard/DigitalIPCard'),
+  {
+    ssr: false,
+  }
+)
+
 import Banner from '@components/Banner'
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
