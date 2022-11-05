@@ -10,6 +10,9 @@ module.exports = {
       title: ['Righteous', 'cursive'],
       content: ['Outfit', 'sans-serif'],
     },
+    backgroundImage: {
+      'gradientBanner': "linear-gradient(0deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)), linear-gradient(105.81deg, #0004C3 6.26%, #FF88CE 67.29%, #D9F4C5 77.98%, rgba(0, 255, 14, 0.55) 91.79%)"
+    },
     boxShadow: {
       sm: '0 2px 6px rgb(15 23 42 / 0.08)',
       md: '0 8px 8px rgb(15 23 42 / 0.05), 0 3px 6px rgb(15 23 42 / 0.05)',
