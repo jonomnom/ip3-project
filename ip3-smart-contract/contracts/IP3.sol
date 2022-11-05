@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Ip3Struct.sol";
 
 interface IERC20 {
@@ -278,7 +279,7 @@ contract IP3 {
         uint256 currentBlockTime = block.timestamp;
         
         // decrease by 1 uint a second  until to the floor price of 1, 1 fake usdc = 10**6 
-        uint256 estimatePrice =   _currentPrice - (currentBlockTime - _lastActive)*1;
+        uint256 estimatePrice =   _currentPrice.div(currentBlockTime.sub(_lastActive)).mul(1);
 
         // 1 erc 20 = 10**6
         uint256 floorPrice = 1*10**6;
