@@ -498,7 +498,7 @@ async function main() {
   
   // apporve contract address to use this (ip3 contract on goerli: 0x4396b65Cf8A9f602C0Be1044a7077f2230377e38)
   const ip3Address = "0x4396b65Cf8A9f602C0Be1044a7077f2230377e38";
-  let approvalTx = await erc20_rw.connect(signer).approve(ip3Address, 20000);
+  let approvalTx = await erc20_rw.connect(signer).approve(ip3Address, 10**15); // erc20 
   await approvalTx.wait();
 
   const ip3Contract = new ethers.Contract(ip3Address, ip3Abi, signer);

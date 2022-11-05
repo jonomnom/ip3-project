@@ -24,7 +24,7 @@ contract IP3 {
     //////////////////////////////////////////////////////////////*/
 
     IERC20 acceptedUSDT;
-    mapping(bytes32 => AuthorizeRecord) authroizeRecordMap; // hash of AuthorizedNFT => record
+    mapping(bytes32 => AuthorizeRecord) authroizeRecordMap; // hash of NFT => record
     mapping(bytes32 => AuthorizeCertificate) authorizeCertificateMap; // hash of AuthorizeCertificate => certificate
 
     event Purchased(
@@ -51,7 +51,7 @@ contract IP3 {
         AuthorizedNFT memory _authorizedNFT,
         Term memory _term
     ) external {
-        ///@dev temporary purchase with CountOnly, will update more options.
+        ///@dev
 
         // DurationOnly
         if (_authorizedNFT.rentalType == RentalType.DurationOnly) {
@@ -61,12 +61,10 @@ contract IP3 {
                 _term.authorizedEndTime,
                 msg.sender
             );
-            // purchase(_authorizedNFT, msg.sender);
 
             // Countonly
         } else {
             purchaseCount(_authorizedNFT, _term.count, msg.sender);
-            // purchase(_authorizedNFT, msg.sender);
         }
     }
 
@@ -84,22 +82,10 @@ contract IP3 {
         uint256 _count,
         address _renterAddress
     ) private {
-        //use IERC20 instance to perform the exchange here
-        uint256 termedPrice;
         // first get approved amount from USDT approve, then can purchase this
         bytes32 hashedAuthorizeNFT = hashAuthorizeNFT(_authorizedNFT);
-        uint256 price = _authorizedNFT.nft.currentPrice;
-        if (price == 0) {
-            price = 1;
-            termedPrice = price;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        } else {
-            termedPrice = price;
-            price *= 2;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        }
+        
 
-        ///@dev temporary use Count option and count=1, will update the options later.
         //https://ethereum.stackexchange.com/questions/1511/how-to-initialize-a-struct
         Term memory newTerm = Term(0, 0, _count);
         bytes32 singature = hashedAuthorizeNFT; //TODO: authrizednft
@@ -130,6 +116,26 @@ contract IP3 {
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
 
+
+        //use IERC20 instance to perform the exchange here
+        uint256 termedPrice;
+        
+        // get the current price
+        uint256 price = _authorizedNFT.nft.currentPrice;
+
+
+        // put transfer at the end to prevent the reentry attack 
+        if (price == 0) {
+            price = 1;
+            termedPrice = price;
+            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+        } else {
+            termedPrice = price;
+            price *= 2;
+            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+        }
+
+
         emit Purchased(
             hashedNft,
             hashedCertificate,
@@ -145,20 +151,9 @@ contract IP3 {
         uint256 _endTime,
         address _renterAddress
     ) private {
-        //use IERC20 instance to perform the exchange here
-        uint256 termedPrice;
+     
         // first get approved amount from USDT approve, then can purchase this
         bytes32 hashedAuthorizeNFT = hashAuthorizeNFT(_authorizedNFT);
-        uint256 price = _authorizedNFT.nft.currentPrice;
-        if (price == 0) {
-            price = 1;
-            termedPrice = price;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        } else {
-            termedPrice = price;
-            price *= 2;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        }
 
         ///@dev temporary use Count option and count=1, will update the options later.
         //https://ethereum.stackexchange.com/questions/1511/how-to-initialize-a-struct
@@ -190,6 +185,25 @@ contract IP3 {
 
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
+
+        //use IERC20 instance to perform the exchange here
+        uint256 termedPrice;
+        
+        // get the current price
+        uint256 price = _authorizedNFT.nft.currentPrice;
+
+
+        // put transfer at the end to prevent the reentry attack 
+        if (price == 0) {
+            price = 1;
+            termedPrice = price;
+            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+        } else {
+            termedPrice = price;
+            price *= 2;
+            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+        }
+
 
         emit Purchased(
             hashedNft,
@@ -257,5 +271,21 @@ contract IP3 {
         returns (AuthorizeCertificate memory)
     {
         return authorizeCertificateMap[_hashedCertificate];
+    }
+
+    function getCurrentPrice(uint256 _lastActive, uint256 _currentPrice) external view returns(uint256) {
+        uint256 currentBlockTime = block.timestamp;
+        
+        // decrease by 1 uint a second  until to the floor price of 1, 1 fake usdc = 10**6 
+        uint256 estimatePrice =   _currentPrice - (currentBlockTime - _lastActive)*1;
+
+        // 1 erc 20 = 10**6
+        uint256 floorPrice = 1*10**6;
+        if ( estimatePrice < floorPrice ) {
+            return floorPrice;
+        } else {
+            return estimatePrice;
+        }
+
     }
 }
