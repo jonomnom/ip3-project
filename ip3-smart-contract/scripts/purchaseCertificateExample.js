@@ -50,11 +50,6 @@ const ip3Abi = [
                 "internalType": "string",
                 "name": "tokenId",
                 "type": "string"
-              },
-              {
-                "internalType": "uint256",
-                "name": "currentPrice",
-                "type": "uint256"
               }
             ],
             "internalType": "struct NFT",
@@ -92,6 +87,16 @@ const ip3Abi = [
             "internalType": "uint256",
             "name": "listEndTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActive",
+            "type": "uint256"
           }
         ],
         "indexed": false,
@@ -119,11 +124,6 @@ const ip3Abi = [
                     "internalType": "string",
                     "name": "tokenId",
                     "type": "string"
-                  },
-                  {
-                    "internalType": "uint256",
-                    "name": "currentPrice",
-                    "type": "uint256"
                   }
                 ],
                 "internalType": "struct NFT",
@@ -160,6 +160,16 @@ const ip3Abi = [
               {
                 "internalType": "uint256",
                 "name": "listEndTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastActive",
                 "type": "uint256"
               }
             ],
@@ -244,11 +254,6 @@ const ip3Abi = [
                     "internalType": "string",
                     "name": "tokenId",
                     "type": "string"
-                  },
-                  {
-                    "internalType": "uint256",
-                    "name": "currentPrice",
-                    "type": "uint256"
                   }
                 ],
                 "internalType": "struct NFT",
@@ -285,6 +290,16 @@ const ip3Abi = [
               {
                 "internalType": "uint256",
                 "name": "listEndTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastActive",
                 "type": "uint256"
               }
             ],
@@ -372,6 +387,30 @@ const ip3Abi = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_lastActive",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_currentPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCurrentPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "components": [
           {
             "components": [
@@ -389,11 +428,6 @@ const ip3Abi = [
                 "internalType": "string",
                 "name": "tokenId",
                 "type": "string"
-              },
-              {
-                "internalType": "uint256",
-                "name": "currentPrice",
-                "type": "uint256"
               }
             ],
             "internalType": "struct NFT",
@@ -430,6 +464,16 @@ const ip3Abi = [
           {
             "internalType": "uint256",
             "name": "listEndTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActive",
             "type": "uint256"
           }
         ],
@@ -490,14 +534,13 @@ async function main() {
   const USDCaddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
   const DURATION_ONLY = 1;
   const COUNT_ONLY = 2;
-  const BOTH_SUPPORTED = 3;
 
   const [signer] = await ethers.getSigners();
 
   const erc20_rw = new ethers.Contract(USDCaddress, abi, signer);
   
-  // apporve contract address to use this (ip3 contract on goerli: 0x4396b65Cf8A9f602C0Be1044a7077f2230377e38)
-  const ip3Address = "0x4396b65Cf8A9f602C0Be1044a7077f2230377e38";
+  // apporve contract address to use this (ip3 contract on goerli: 0xD42B73522614074f65E7146d91D1A100838Bc9E5)
+  const ip3Address = "0xD42B73522614074f65E7146d91D1A100838Bc9E5";
   let approvalTx = await erc20_rw.connect(signer).approve(ip3Address, 10**15); // erc20 
   await approvalTx.wait();
 
@@ -508,10 +551,12 @@ async function main() {
   const _listEndTime = 1;
 
   // purchase certificate
-  const _nft = ["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1, 0];
-  const _authorizedNFT = [_nft,_rentalType,_authorizer,_listStartTime,_listEndTime];
+  const _nft = ["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1];
+  // const _authorizedNFT = [_nft,_rentalType,_authorizer,_listStartTime,_listEndTime, 10000, 1];
+  const _authorizedNFT = [["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1],1, ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5","0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"],0,1, 10, 1];
+
   const _term = [0,0,5];
-  
+  // [["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1],1, ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5","0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"],0,1, 10, 1]
   let purchaseTx = await ip3Contract.connect(signer).purchaseAuthorization(_authorizedNFT, _term);
   let purchaseEvent =  await purchaseTx.wait()
 
