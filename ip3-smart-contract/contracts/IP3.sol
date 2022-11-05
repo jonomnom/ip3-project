@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/Math.sol";
 import "./Ip3Struct.sol";
 
 interface IERC20 {
@@ -281,11 +282,6 @@ contract IP3 {
 
         // 1 erc 20 = 10**6
         uint256 floorPrice = 1*10**6;
-        if ( estimatePrice < floorPrice ) {
-            return floorPrice;
-        } else {
-            return estimatePrice;
-        }
-
+        return max(floorPrice, estimatePrice);
     }
 }
