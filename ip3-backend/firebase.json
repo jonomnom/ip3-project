@@ -1,0 +1,33 @@
+{
+  "functions": {
+    "predeploy": [
+      "yarn --cwd \"$RESOURCE_DIR\" install",
+      "yarn --cwd \"$RESOURCE_DIR\" run lint",
+      "yarn --cwd \"$RESOURCE_DIR\" run build"
+    ],
+    "source": "functions"
+  },
+  "hosting": {
+    "public": "./hosting"
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5555
+    }
+  },
+  "headers": [
+    {
+      "source": "**",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
