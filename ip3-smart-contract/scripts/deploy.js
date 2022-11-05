@@ -1,31 +1,28 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+    const [deployer] = await ethers.getSigners();
+    /**
+     * deploy shop implementation ,proxy created by factory contract 
+     */
+    console.log("Deploying contracts with the account:", deployer.address);
+    console.log("Account balance:", (await deployer.getBalance()).toString());
+    
+    // deploy the web3shop factory contract
+    const IP3Factory = await ethers.getContractFactory("IP3");
+    // fake USDC 0x07865c6E87B9F70255377e024ace6630C1Eaa37F, https://goerli.etherscan.io/token/0x07865c6e87b9f70255377e024ace6630c1eaa37f
+    const USDCAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"; // in goerli 
+    const ip3Factory = await IP3Factory.deploy(USDCAddress);
+    console.log("Ip3 contract address:", ip3Factory.address);
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
+    setTimeout(() => {  console.log("World!"); }, 1000*30);
 
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+    console.log("complete deploy ip3 contract");
+    
 }
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
+main()
+.then(() => process.exit(0))
+.catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  process.exit(1);
 });
