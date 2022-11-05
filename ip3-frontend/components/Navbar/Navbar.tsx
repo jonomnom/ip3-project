@@ -38,10 +38,37 @@ const IP3Navbar: FC<Props> = ({ className }) => {
   )
 
   return (
-    <div className="sticky top-0 z-50 flex w-full items-center justify-between font-title text-white">
+    <div className="relative z-50 flex w-full items-center justify-between px-16 py-8 font-title text-white">
       {/* <div>IP3</div>
       <WalletConnectButtonGroup /> */}
-      <Navbar isBordered variant="sticky" maxWidth="fluid">
+      <div>
+        <Link href="/">
+          <Image
+            src={'/logo-white.png'}
+            width={64}
+            height={64}
+            layout="intrinsic"
+            objectFit="contain"
+            alt="ip3-logo.png"
+          />
+        </Link>
+      </div>
+
+      <div className="flex items-center justify-center gap-4 text-lg tracking-wider text-black">
+        <Link href="/auth/assets" className="text-white">
+          EXPLORE
+        </Link>
+
+        <WalletConnectButtonGroup />
+        {/* <Link href="/auth/assets" className="text-black">
+          RENT
+        </Link>
+        <Link href="/auth/assets" className="text-black">
+          LEND
+        </Link> */}
+      </div>
+
+      {/* <Navbar isBordered variant="sticky" maxWidth="fluid">
         <Navbar.Toggle showIn="xs" />
         <Navbar.Brand
           css={{
@@ -76,18 +103,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
             LEND
           </Link>
         </div>
-        {/* <Navbar.Content
-          enableCursorHighlight
-          activeColor="secondary"
-          hideIn="xs"
-          variant="highlight-rounded"
-        >
-          <Navbar.Link href="/auth/assets" isActive>
-            EXPLORE
-          </Navbar.Link>
-          <Navbar.Link href="#">RENT</Navbar.Link>
-          <Navbar.Link href="#">LEND</Navbar.Link>
-        </Navbar.Content> */}
+
         <Navbar.Content
           css={{
             '@xs': {
@@ -97,48 +113,6 @@ const IP3Navbar: FC<Props> = ({ className }) => {
           }}
         >
           <WalletConnectButtonGroup />
-          {/* <Dropdown placement="bottom-right">
-            <Navbar.Item>
-              <Dropdown.Trigger>
-                <Avatar
-                  bordered
-                  as="button"
-                  color="secondary"
-                  size="md"
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                />
-              </Dropdown.Trigger>
-            </Navbar.Item>
-            <Dropdown.Menu
-              aria-label="User menu actions"
-              color="secondary"
-              onAction={(actionKey) => console.log({ actionKey })}
-            >
-              <Dropdown.Item key="profile" css={{ height: '$18' }}>
-                <Text b color="inherit" css={{ d: 'flex' }}>
-                  Signed in as
-                </Text>
-                <Text b color="inherit" css={{ d: 'flex' }}>
-                  zoey@example.com
-                </Text>
-              </Dropdown.Item>
-              <Dropdown.Item key="settings" withDivider>
-                My Settings
-              </Dropdown.Item>
-              <Dropdown.Item key="team_settings">Team Settings</Dropdown.Item>
-              <Dropdown.Item key="analytics" withDivider>
-                Analytics
-              </Dropdown.Item>
-              <Dropdown.Item key="system">System</Dropdown.Item>
-              <Dropdown.Item key="configurations">Configurations</Dropdown.Item>
-              <Dropdown.Item key="help_and_feedback" withDivider>
-                Help & Feedback
-              </Dropdown.Item>
-              <Dropdown.Item key="logout" withDivider color="error">
-                Log Out
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown> */}
         </Navbar.Content>
         <Navbar.Collapse>
           {collapseItems.map((item, index) => (
@@ -154,7 +128,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
             </Navbar.CollapseItem>
           ))}
         </Navbar.Collapse>
-      </Navbar>
+      </Navbar> */}
     </div>
   )
 }
