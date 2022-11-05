@@ -1,7 +1,8 @@
 import { FC } from 'react'
 import WalletConnectButtonGroup from '../WalletConnectButtonGroup'
-import { Navbar, Link, Text, Avatar, Dropdown } from '@nextui-org/react'
+import { Navbar, Text, Avatar, Dropdown } from '@nextui-org/react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface Props {
   className?: string
@@ -37,7 +38,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
   )
 
   return (
-    <div className="sticky top-0 z-50 flex w-full items-center justify-between text-white">
+    <div className="sticky top-0 z-50 flex w-full items-center justify-between font-title text-white">
       {/* <div>IP3</div>
       <WalletConnectButtonGroup /> */}
       <Navbar isBordered variant="sticky" maxWidth="fluid">
@@ -59,23 +60,34 @@ const IP3Navbar: FC<Props> = ({ className }) => {
               alt="ip3-logo.png"
             />
           </Link>
-          <Text b color="inherit" hideIn="xs" className="pl-2">
+          <Text b color="inherit" hideIn="xs" className="pl-2" size="$xl">
             IP3
           </Text>
         </Navbar.Brand>
-        <Navbar.Content
+
+        <div className="flex items-center justify-center gap-4 text-lg tracking-wider text-black">
+          <Link href="/auth/assets" className="text-black">
+            EXPLORE
+          </Link>
+          <Link href="/auth/assets" className="text-black">
+            RENT
+          </Link>
+          <Link href="/auth/assets" className="text-black">
+            LEND
+          </Link>
+        </div>
+        {/* <Navbar.Content
           enableCursorHighlight
           activeColor="secondary"
           hideIn="xs"
           variant="highlight-rounded"
         >
           <Navbar.Link href="/auth/assets" isActive>
-            Explore
+            EXPLORE
           </Navbar.Link>
-          <Navbar.Link href="#">Rent</Navbar.Link>
-          <Navbar.Link href="#">Lend</Navbar.Link>
-          {/* <Navbar.Link href="#">Company</Navbar.Link> */}
-        </Navbar.Content>
+          <Navbar.Link href="#">RENT</Navbar.Link>
+          <Navbar.Link href="#">LEND</Navbar.Link>
+        </Navbar.Content> */}
         <Navbar.Content
           css={{
             '@xs': {
@@ -138,15 +150,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
               }}
               isActive={index === 2}
             >
-              <Link
-                color="inherit"
-                css={{
-                  minWidth: '100%',
-                }}
-                href="#"
-              >
-                {item}
-              </Link>
+              <Link href="#">{item}</Link>
             </Navbar.CollapseItem>
           ))}
         </Navbar.Collapse>
