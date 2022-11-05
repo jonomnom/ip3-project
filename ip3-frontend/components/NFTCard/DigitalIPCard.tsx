@@ -55,7 +55,7 @@ export default function DigitalIPCard({ nft }: Props) {
   return (
     <div className="relative z-10 w-full rounded-lg border border-black text-black">
       <Link
-        href={`/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}`}
+        href={`/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}/rent`}
         passHref
       >
         <div className="relative w-full overflow-hidden rounded-lg">
@@ -76,7 +76,14 @@ export default function DigitalIPCard({ nft }: Props) {
             </div>
           </div>
 
-          <button className="flex items-center justify-center rounded-2xl bg-black px-4 pr-4 font-title text-sm text-white">
+          <button
+            className="flex items-center justify-center rounded-2xl bg-black px-4 pr-4 font-title text-sm text-white"
+            onClick={() => {
+              push(
+                `/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}/rent`
+              )
+            }}
+          >
             RENT
           </button>
         </div>

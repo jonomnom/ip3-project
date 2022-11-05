@@ -38,7 +38,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
   )
 
   return (
-    <div className="relative z-50 flex w-full items-center justify-between px-16 py-8 font-title text-white">
+    <div className="absolute top-0  z-50 flex w-full items-center justify-between px-16 py-8 font-title text-white">
       {/* <div>IP3</div>
       <WalletConnectButtonGroup /> */}
       <div>

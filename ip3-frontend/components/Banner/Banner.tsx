@@ -8,7 +8,7 @@ interface Props {
 
 const Banner = ({ title, subtitle }: Props) => {
   return (
-    <div className="relative z-0 flex h-full w-full items-center justify-center bg-gradientBanner py-8  pt-[140px] text-white">
+    <div className="relative z-0 flex h-full w-full items-center justify-center bg-gradientBanner py-8  pt-[100px] text-white">
       {/* <Image
         className="pointer-events-none z-10"
         alt="banner"
