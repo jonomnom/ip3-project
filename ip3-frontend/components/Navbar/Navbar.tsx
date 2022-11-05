@@ -59,7 +59,7 @@ const IP3Navbar: FC<Props> = ({ className }) => {
           hideIn="xs"
           variant="highlight-rounded"
         >
-          <Navbar.Link href="#" isActive>
+          <Navbar.Link href="/auth/assets" isActive>
             Explore
           </Navbar.Link>
           <Navbar.Link href="#">Rent</Navbar.Link>

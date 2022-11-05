@@ -19,11 +19,14 @@ export default function Home({}: Props) {
         <div className="relative flex flex-1 items-center justify-center bg-black">
           <div className="group relative flex flex-col items-center">
             <div className="relative group-hover:-top-24">
-              <div className="relative rounded-full bg-white px-20 py-10 text-black group-hover:scale-75">
-                <div className="text-8xl font-bold tracking-wider text-black">
-                  RENT
+              <Link href="/auth/assets" passHref>
+                <div className="relative rounded-full bg-white px-20 py-10 text-black group-hover:scale-75">
+                  <div className="text-8xl font-bold tracking-wider text-black">
+                    RENT
+                  </div>
                 </div>
-              </div>
+              </Link>
+
               <div className="hidden whitespace-pre-line text-center text-white group-hover:block">
                 {`explore and rent your \n favorite NFTs for exhibitions \n or commercial use`}
               </div>
@@ -50,7 +53,7 @@ export default function Home({}: Props) {
       </div>
 
       <div className="ins absolute inset-x-0 bottom-32 mx-auto h-48 w-48">
-        <Link href="/" passHref>
+        <Link href="/auth/assets" passHref>
           <div
             aria-label="Logo"
             className="relative flex h-44 w-44 items-center justify-center 
