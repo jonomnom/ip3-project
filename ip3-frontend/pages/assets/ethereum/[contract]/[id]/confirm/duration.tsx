@@ -1,15 +1,21 @@
 import { classNames, parseAddressForShow } from '@lib/utils'
 import { GetServerSidePropsContext } from 'next'
-import React, { useEffect, useState } from 'react'
+import React, { PureComponent } from 'react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts'
+
 import axios from 'axios'
 import Layout from '@components/Layout'
-// import { NFT } from '../../constant/types'
-// import NFTCard from '@components/NFTCard'
-// import { Button } from '@nextui-org/react'
-// import { Filter2, Heart } from 'react-iconly'
 import { ethers } from 'ethers'
 import { ParsedUrlQuery } from 'querystring'
-import { NFT, RentableNFT } from '../../../../../constant/types'
 
 import { DateRangePicker } from 'rsuite'
 import addDays from 'date-fns/addDays'
@@ -20,6 +26,7 @@ import Banner from '@components/Banner'
 import Link from 'next/link'
 import Image from 'next/image'
 import DemoSwiper from '@components/Swiper/DemoSwiper'
+import { NFT, RentableNFT } from '../../../../../../constant/types'
 
 const predefinedRanges = [
   {
@@ -46,6 +53,44 @@ const predefinedRanges = [
     label: 'Next 1 year',
     value: [new Date(), addMonths(new Date(), 12)],
     placement: 'left',
+  },
+]
+
+const data = [
+  {
+    name: 'Page A',
+    uv: 0,
+    amt: 2400,
+  },
+  {
+    name: 'Page B',
+    uv: 400,
+    amt: 2210,
+  },
+  {
+    name: 'Page C',
+    uv: 700,
+    amt: 2290,
+  },
+  {
+    name: 'Page D',
+    uv: 800,
+    amt: 2000,
+  },
+  {
+    name: 'Page E',
+    uv: 900,
+    amt: 2181,
+  },
+  {
+    name: 'Page F',
+    uv: 950,
+    amt: 2500,
+  },
+  {
+    name: 'Page G',
+    uv: 990,
+    amt: 2100,
   },
 ]
 
@@ -103,7 +148,7 @@ interface Props {
   nft: NFT
 }
 
-export default function RentPage({ nft }: Props) {
+export default function ConfirmDuration({ nft }: Props) {
   const { address } = useAccount()
   //   const [hideSelectorTool, setHideSelectorTool] = useState(false)
 
@@ -161,103 +206,95 @@ export default function RentPage({ nft }: Props) {
 
   return (
     <div className="relative w-full">
-      <Banner
-        title="License"
-        subtitle="Get the license fits you best."
-      ></Banner>
+      <Banner title="Confirm" subtitle="Pick your price and date"></Banner>
+      <div className="flex w-full items-center justify-center">
+        <div className="flex w-full max-w-7xl flex-col items-start justify-center gap-8  py-16">
+          <div className="h-96 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                width={500}
+                height={300}
+                data={data}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-      <div className="flex w-full">
-        <div className="relative flex min-h-[80vh] w-1/2 flex-col items-end justify-start bg-black pt-10 text-white">
-          <div className="max-w-2xl">
-            <DemoSwiper />
-
-            <div className="pt-6 opacity-60">Your right with this License</div>
-            <div className="text-white">
-              <div>- Allow to use for exhibition, storefront display, etc.</div>
-              <div>- No commercial use for sale</div>
+          <div className="flex w-full justify-between">
+            <div className="flex flex-col">
+              <div className="opacity-60">Listed Price for Authorization</div>
+              <div className="font-title text-2xl font-semibold">
+                20 USDT/Day
+              </div>
             </div>
 
-            <div className="mt-8 flex max-w-2xl gap-10">
-              <div className="flex flex-col">
-                <div className="opacity-60">Listed Price for Authorization</div>
-                <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                <div className="opacity-60">Available Until</div>
-                <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative mt-8 flex max-w-2xl flex-col items-center">
-              <div className="relative">
-                <Link
-                  href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/confirm/duration`}
-                  passHref
-                >
-                  <div className="relative rounded-full bg-white px-8 py-2 text-black">
-                    <div className="text-3xl font-bold tracking-wider text-black">
-                      Rent by days
-                    </div>
-                  </div>
-                </Link>
+            <div className="flex flex-col">
+              <div className="opacity-60">Available Until</div>
+              <div className="font-title text-2xl font-semibold">
+                20 USDT/Day
               </div>
             </div>
           </div>
 
-          {/* <div className="my-6 border-t border-white" /> */}
-        </div>
+          <div className="flex w-full justify-between">
+            <div className="flex flex-col">
+              <div className="opacity-60">Total Price</div>
+              <div className="font-title text-2xl font-semibold">5000 USDT</div>
+            </div>
 
-        <div className="relative flex min-h-[80vh] w-1/2 flex-col items-start justify-start bg-white pl-24 pt-10 text-black">
-          <div className="max-w-2xl">
-            <DemoSwiper />
+            <div className="flex flex-col">
+              <div className="opacity-60">Total Days</div>
+              <div className="font-title text-2xl font-semibold">
+                10 USDT/Day
+              </div>
+            </div>
+          </div>
 
+          <div className="w-full border-t border-black" />
+
+          <div>
             <div className="pt-6 opacity-60">Your right with this License</div>
             <div className="text-black">
               <div>- Allow to use for exhibition, storefront display, etc.</div>
               <div>- No commercial use for sale</div>
             </div>
-
-            <div className="mt-8 flex max-w-2xl gap-10">
-              <div className="flex flex-col">
-                <div className="opacity-60">Listed Price for Authorization</div>
-                <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                <div className="opacity-60">Available Until</div>
-                <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative mt-8 flex max-w-2xl flex-col items-center">
-              <div className="relative">
-                <Link
-                  href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/confirm/amount`}
-                >
-                  <div className="relative rounded-full bg-black px-8 py-2">
-                    <div className="text-3xl font-bold tracking-wider text-white">
-                      Rent by amounts
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </div>
           </div>
 
-          {/* <div className="my-6 border-t border-white" /> */}
+          <div className="flex w-full items-center justify-between">
+            <Link href="#" passHref>
+              <div className="relative rounded-full bg-black px-8 py-2">
+                <div className="font-title text-3xl font-bold tracking-wider text-white">
+                  Get this License
+                </div>
+              </div>
+            </Link>
+            <Link
+              href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/rent`}
+              passHref
+            >
+              <div className="relative rounded-full border border-black bg-white px-8 py-2">
+                <div className="font-title text-3xl font-bold tracking-wider text-black">
+                  Back
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-RentPage.Layout = Layout
+ConfirmDuration.Layout = Layout
