@@ -16,8 +16,6 @@ struct NFT {
     string chainId;
     address NFTAddress;
     string tokenId;
-    uint256 currentPrice;
-    uint256 lastActive; // last active timestamp
 }
 
 struct AuthorizedNFT {
@@ -26,6 +24,8 @@ struct AuthorizedNFT {
     Authorizer authorizer;
     uint256 listStartTime;
     uint256 listEndTime;
+    uint256 currentPrice;
+    uint256 lastActive; // last active timestamp
 }
 
 struct Term {
