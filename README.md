@@ -15,4 +15,4 @@ Features:
 - Use [Tenderly](https://tenderly.co/) for contract alert and contract simulation.
 
 ## Verify contract on Goerli
-run `npx hardhat verify --network goerli <IP3 Contract address> "<Stable coin address>"`
+run `npx hardhat verify --network goerli <IP3 Contract address> "<ERC20 coin address>"`
