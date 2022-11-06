@@ -1,9 +1,9 @@
 # ip3-project
 
-[IP3](https://ip3-project.vercel.app/) is a digital licensing platform to provides the digital authorization on-chain with automatic dynamic pricing mechanism.
+[IP3](https://ip3-project.vercel.app/) is a digital licensing platform to provide digital authorization on-chain with an automatic dynamic pricing mechanism.
 
 Features:
-- One NFT could be authorized to multiple authorizations terms.
+- One NFT could be authorized to multiple authorizations.
 - No need to stake the NFT into the smart contract, NFT holders can sign-in to authorize their NFTs without transferring their NFT out from their wallets.
 - Support authorized in count term (e.g. 10 times), or authorized in time-period term (e.g. 6-month).
 - Support payment with [APE Coin](https://apecoin.com/).
