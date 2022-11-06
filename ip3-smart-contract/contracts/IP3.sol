@@ -13,6 +13,10 @@ interface IERC20 {
         address recipient,
         uint256 amount
     ) external returns (bool);
+
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    function balanceOf(address account) external returns (uint256);
 }
 
 /**
@@ -26,16 +30,19 @@ contract IP3 {
     //////////////////////////////////////////////////////////////*/
 
     IERC20 acceptedUSDT;
-    mapping(bytes32 => AuthorizeRecord) authroizeRecordMap; // hash of NFT => record
+    mapping(bytes32 => NFTipOverall) authroizeRecordMap; // hash of NFT => record
     mapping(bytes32 => AuthorizeCertificate) authorizeCertificateMap; // hash of AuthorizeCertificate => certificate
+    mapping(address => uint256) claimableMap; // address to claim the authroization revenue
 
     event Purchased(
-        bytes32 indexed hashedAuthorizeNFT,
+        bytes32 indexed hashedNFT,
         bytes32 indexed hashedAuthorizeCertificate,
         address indexed renterAddress,
         AuthorizedNFT authorizedNFT,
         AuthorizeCertificate authorizeCertificate
     );
+
+    event ClaimRevenue(address indexed claimAddress, uint256 claimRevenue);
 
     constructor(IERC20 instanceAddress) {
         acceptedUSDT = instanceAddress;
@@ -94,54 +101,31 @@ contract IP3 {
         //use IERC20 instance to perform the exchange here
         uint256 termedPrice;
 
-        AuthorizeCertificate
-            memory newAuthorizeCertificate = AuthorizeCertificate(
-                _authorizedNFT,
-                newTerm,
-                _renterAddress,
-                termedPrice,
-                singature
-            );
-
-        bytes32 hashedCertificate = keccak256(
-            abi.encodePacked(
-                hashedAuthorizeNFT,
-                hashTerm(newTerm),
-                _renterAddress,
-                termedPrice,
-                singature
-            )
-        );
-
-        bytes32 hashedNft = hashNftInfo(_authorizedNFT.nft);
-        // update AuthroizedNFT record
-        authroizeRecordMap[hashedNft].totalAuthorizedCount += 1;
-        authroizeRecordMap[hashedNft].totalTransactionRevenue += termedPrice;
-
-        // update authorizeCertificateMap
-        authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-
         // get the current price
         uint256 price = _authorizedNFT.currentPrice;
 
         // put transfer at the end to prevent the reentry attack
         if (price == 0) {
-            price = 1;
-            termedPrice = price;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        } else {
-            termedPrice = price;
-            price *= 2;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+            price = 10**6;
         }
 
-        emit Purchased(
-            hashedNft,
-            hashedCertificate,
-            msg.sender,
+        termedPrice = price;
+        _authorizedNFT.currentPrice = price;
+        _authorizedNFT.lastActive = block.timestamp;
+
+        updatePurchaseState(
             _authorizedNFT,
-            newAuthorizeCertificate
+            newTerm,
+            _renterAddress,
+            termedPrice,
+            hashedAuthorizeNFT,
+            singature
         );
+
+        // put transfer at the end to prevent the reentry attack
+        acceptedUSDT.transferFrom(msg.sender, address(this), termedPrice);
+
+ 
     }
 
     function purchaseByDuration(
@@ -161,54 +145,29 @@ contract IP3 {
         //use IERC20 instance to perform the exchange here
         uint256 termedPrice;
 
-        AuthorizeCertificate
-            memory newAuthorizeCertificate = AuthorizeCertificate(
-                _authorizedNFT,
-                newTerm,
-                _renterAddress,
-                termedPrice,
-                singature
-            );
-
-        bytes32 hashedCertificate = keccak256(
-            abi.encodePacked(
-                hashedAuthorizeNFT,
-                hashTerm(newTerm),
-                _renterAddress,
-                termedPrice,
-                singature
-            )
-        );
-
-        bytes32 hashedNft = hashNftInfo(_authorizedNFT.nft);
-        // update AuthroizedNFT record
-        authroizeRecordMap[hashedNft].totalAuthorizedCount += 1;
-        authroizeRecordMap[hashedNft].totalTransactionRevenue += termedPrice;
-
-        // update authorizeCertificateMap
-        authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-
         // get the current price
         uint256 price = _authorizedNFT.currentPrice;
 
-        // put transfer at the end to prevent the reentry attack
         if (price == 0) {
-            price = 1;
-            termedPrice = price;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
-        } else {
-            termedPrice = price;
-            price *= 2;
-            acceptedUSDT.transferFrom(msg.sender, address(this), price);
+            price = 10**6;
         }
 
-        emit Purchased(
-            hashedNft,
-            hashedCertificate,
-            msg.sender,
+        termedPrice = price;
+        _authorizedNFT.currentPrice = price;
+        _authorizedNFT.lastActive = block.timestamp;
+
+        updatePurchaseState(
             _authorizedNFT,
-            newAuthorizeCertificate
+            newTerm,
+            _renterAddress,
+            termedPrice,
+            hashedAuthorizeNFT,
+            singature
         );
+
+        // put transfer at the end to prevent the reentry attack
+        acceptedUSDT.transferFrom(msg.sender, address(this), termedPrice);
+
     }
 
     function hashNftInfo(NFT memory _nft) private pure returns (bytes32) {
@@ -251,13 +210,74 @@ contract IP3 {
     }
 
     /*//////////////////////////////////////////////////////////////
+                    CLAIM REVENUE
+    //////////////////////////////////////////////////////////////*/
+    function claimRevnue(address _address) external {
+        uint256 totalBalance = claimableMap[_address];
+        require( totalBalance> 0, "ZERO BALANCE");
+        acceptedUSDT.transfer(_address, totalBalance);
+
+        emit ClaimRevenue(_address, totalBalance);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    UPDATE STATE STORAGE
+    //////////////////////////////////////////////////////////////*/
+    function updatePurchaseState(
+       AuthorizedNFT memory _authorizedNFT,
+        Term memory newTerm,
+        address _renterAddress,
+        uint256 termedPrice,
+        bytes32 hashedAuthorizeNFT,
+        bytes32 singature
+    ) private {
+        AuthorizeCertificate
+            memory newAuthorizeCertificate = AuthorizeCertificate(
+                _authorizedNFT,
+                newTerm,
+                _renterAddress,
+                termedPrice,
+                singature
+            );
+
+        bytes32 hashedCertificate = keccak256(
+            abi.encodePacked(
+                hashedAuthorizeNFT,
+                hashTerm(newTerm),
+                _renterAddress,
+                termedPrice,
+                singature
+            )
+        );
+
+        bytes32 hashedNft = hashNftInfo(_authorizedNFT.nft);
+        // update AuthroizedNFT record
+        authroizeRecordMap[hashedNft].authorizeRecord.totalAuthorizedCount += 1;
+        authroizeRecordMap[hashedNft].authorizeRecord.totalTransactionRevenue += termedPrice;
+        authroizeRecordMap[hashedNft].authorizedNFT = _authorizedNFT;
+        // update authorizeCertificateMap
+        authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
+
+        // update claimable address
+        claimableMap[_authorizedNFT.authorizer.claimAddress] += termedPrice;
+
+        emit Purchased(
+            hashedNft,
+            hashedCertificate,
+            msg.sender,
+            _authorizedNFT,
+            newAuthorizeCertificate
+        );
+    }
+
+    /*//////////////////////////////////////////////////////////////
                     GETTER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     function getAuthroizeRecordMap(bytes32 _hashedNFTInfo)
         external
         view
-        returns (AuthorizeRecord memory)
+        returns (NFTipOverall memory)
     {
         return authroizeRecordMap[_hashedNFTInfo];
     }
@@ -270,20 +290,28 @@ contract IP3 {
         return authorizeCertificateMap[_hashedCertificate];
     }
 
-    function getCurrentPrice(uint256 _lastActive, uint256 _currentPrice)
+    function getCurrentPrice(bytes32 _hashedNft)
         external
         view
         returns (uint256)
     {
+        
+        uint256 _currentPrice = authroizeRecordMap[_hashedNft].authorizedNFT.currentPrice;
+        uint256 _lastActive = authroizeRecordMap[_hashedNft].authorizedNFT.lastActive;
+
         uint256 currentBlockTime = block.timestamp;
 
-        // decrease by 1 uint a second until to the floor price of 1, 1 fake usdc = 10**6
-        uint256 estimatePrice = _currentPrice
-            .div(currentBlockTime.sub(_lastActive))
-            .mul(1);
+        // decrease by 1 uint a second  until to the floor price of 1, 1 fake usdc = 10**6
+        uint256 estimatePrice = _currentPrice.sub(
+            currentBlockTime.sub(_lastActive).mul(1)
+        );
 
         // 1 erc 20 = 10**6
         uint256 floorPrice = 1 * 10**6;
         return estimatePrice >= floorPrice ? estimatePrice : floorPrice;
+    }
+
+    function getCurrentClaimable(address _address) external view returns (uint256) {
+        return claimableMap[_address];
     }
 }
