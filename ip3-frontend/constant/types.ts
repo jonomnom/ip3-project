@@ -23,3 +23,15 @@ export interface RentableNFT {
   listed: boolean
   autorizeIP: NFT
 }
+
+export interface NFTLicense {
+  authorizedBy: string
+  authorizedTo: string
+  autorizeIP: NFT
+  licenseStartTime: number // Unix Timestamp
+  licenseEndTime: number // Unix Timestamp
+  licenseQuantity: number
+  totalPrice: number
+  rentalType: string
+  signiture: string
+}
