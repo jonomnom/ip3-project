@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Collections, RentableNFT } from "../type/index";
+import { Collections, NFTLicense, RentableNFT } from "../type/index";
 import { isInputDefined } from "../utils";
 import { getFirestore } from "firebase-admin/firestore";
 import { firestore } from "firebase-admin";
@@ -80,6 +80,50 @@ const listNFTForRent = async (req: Request, res: Response) => {
   }
 };
 
+const purchaseNFTLicense = async (req: Request, res: Response) => {
+  const license: NFTLicense = req.body;
+  if (
+    !isInputDefined([
+      license.authorizedBy,
+      license.authorizedTo,
+      license.totalPrice,
+      license.autorizeIP,
+    ])
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing NFTLicense required info.",
+    });
+  }
+  try {
+    // Create new doc.
+    const writeResult = await getFirestore()
+      .collection(Collections.DIGITAL_LICENSE)
+      .add({
+        authorizedTo: license.authorizedTo,
+        authorizedBy: license.authorizedBy,
+        autorizeIP: license.autorizeIP,
+        licenseStartTime: license.licenseStartTime,
+        licenseEndTime: license.licenseEndTime,
+        licenseQuantity: license.licenseQuantity,
+        totalPrice: license.totalPrice,
+        rentalType: license.rentalType,
+        signiture: license.signiture,
+        created: firestore.FieldValue.serverTimestamp(),
+        updated: firestore.FieldValue.serverTimestamp(),
+      });
+    return res.status(200).json({
+      success: true,
+      message: "You get NFTLicense successfully!",
+      result: {
+        id: writeResult.id,
+      },
+    });
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+};
+
 /**
  * Get all listed rentable NFT.
  */
@@ -139,7 +183,6 @@ const getRentableNFT = async (req: Request, res: Response) => {
     return res.status(500).send(e);
   }
 };
-
 /**
  * Get specific rentable NFT by contract and token id.
  */
@@ -182,9 +225,48 @@ const getRentableNFTByContract = async (req: Request, res: Response) => {
   }
 };
 
+const getNFTLicense = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.query;
+    console.log(req);
+    if (id === undefined || typeof id !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "NFTLicense ID undefined.",
+      });
+    }
+
+    const doc = await getFirestore()
+      .collection(Collections.DIGITAL_LICENSE)
+      .doc(id)
+      .get();
+
+    console.log(doc);
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        success: false,
+        message: `NFT LICENSE with ID ${id} does not exist.`,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: doc.id,
+        ...doc.data(),
+      },
+    });
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+};
+
 export {
   listNFTForRent,
   getAllListedRentableNFT,
   getRentableNFT,
   getRentableNFTByContract,
+  purchaseNFTLicense,
+  getNFTLicense,
 };

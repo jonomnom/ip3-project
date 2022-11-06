@@ -3,6 +3,7 @@
  */
 export class Collections {
   public static readonly RENTABLE_NFT = "rentable_nft";
+  public static readonly DIGITAL_LICENSE = "digital_license";
 }
 
 export type NFT = {
@@ -29,4 +30,16 @@ export interface RentableNFT {
   signiture: string;
   listed: boolean;
   autorizeIP: NFT;
+}
+
+export interface NFTLicense {
+  authorizedBy: string;
+  authorizedTo: string;
+  autorizeIP: NFT;
+  licenseStartTime: number; // Unix Timestamp
+  licenseEndTime: number; // Unix Timestamp
+  licenseQuantity: number;
+  totalPrice: number;
+  rentalType: string;
+  signiture: string;
 }

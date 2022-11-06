@@ -8,4 +8,5 @@ class Collections {
 }
 exports.Collections = Collections;
 Collections.RENTABLE_NFT = "rentable_nft";
+Collections.DIGITAL_LICENSE = "digital_license";
 //# sourceMappingURL=index.js.map
