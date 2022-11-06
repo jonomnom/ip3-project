@@ -127,9 +127,10 @@ export default function ProveofAuthorizingPage({ rentableNFT }: Props) {
                   </div>
                   <div className="text-black">
                     <div>
-                      - Allow to use for exhibition, storefront display, etc.
+                      Display category, including but not limited to the use of
+                      NFT image by exhibition, hanging, propaganda, advertising,
+                      etc.
                     </div>
-                    <div>- No commercial use for sale</div>
                   </div>
                 </div>
                 <Button

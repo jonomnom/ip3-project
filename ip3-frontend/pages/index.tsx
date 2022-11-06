@@ -22,13 +22,13 @@ export default function Home({}: Props) {
               <Link href="/explore" passHref>
                 <div className="relative rounded-full bg-white px-20 py-10 text-black group-hover:scale-75">
                   <div className=" text-8xl font-bold tracking-wider text-black">
-                    RENT
+                    Get licensed
                   </div>
                 </div>
               </Link>
 
               <div className="hidden whitespace-pre-line text-center text-white group-hover:block">
-                {`explore and rent your \n favorite NFTs for exhibitions \n or commercial use`}
+                {`explore and get copyright license from your \n favorite NFTs for exhibitions \n or commercial use`}
               </div>
             </div>
           </div>
@@ -40,11 +40,11 @@ export default function Home({}: Props) {
               <div className="relative group-hover:-top-24">
                 <div className="relative rounded-full bg-black px-20 py-10 text-white group-hover:scale-75">
                   <div className="text-8xl font-bold tracking-wider text-white">
-                    LEND
+                    Authorizing
                   </div>
                 </div>
                 <div className="hidden whitespace-pre-line text-center text-black group-hover:block">
-                  {`List your NFTs for rent and \n earn tokens today`}
+                  {`Authorize your NFTs for copyright licenses and \n earn rewards today`}
                 </div>
               </div>
             </div>
@@ -59,12 +59,7 @@ export default function Home({}: Props) {
             className="relative flex h-44 w-44 items-center justify-center 
             overflow-hidden rounded-full ring-4 ring-white drop-shadow-[0px_0px_8px_#FFFFFF]
               hover:ring-8 hover:drop-shadow-[-9px_2px_25px_#FFFFFF]"
-            style={
-              {
-                // border: '5px solid #FFFFFF',
-                // filter: 'drop-shadow(-0px -0px 8px #FFFFFF)',
-              }
-            }
+            style={{}}
           >
             <Image
               src="/logo.png"
@@ -75,9 +70,9 @@ export default function Home({}: Props) {
           </div>
         </Link>
       </div>
-      <div className="sticky bottom-0 flex h-12 w-full items-center justify-center bg-white">
+      <div className="sticky bottom-0 flex h-16 w-full items-center justify-center bg-white">
         <span className="text-lg font-bold uppercase tracking-widest">
-          Rent or lend your Web3 IP today at IP3
+          GET LICENSED OR AUTHORIZE YOUR WEB3 IP TODAY AT IP3
         </span>
       </div>
     </div>

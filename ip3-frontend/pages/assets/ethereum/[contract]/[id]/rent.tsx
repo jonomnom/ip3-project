@@ -170,8 +170,10 @@ export default function RentPage({ nft }: Props) {
 
             <div className="pt-6 opacity-60">Your right with this License</div>
             <div className="text-white">
-              <div>- Allow to use for exhibition, storefront display, etc.</div>
-              <div>- No commercial use for sale</div>
+              <div>
+                Display category, including but not limited to the use of NFT
+                image by exhibition, hanging, propaganda, advertising, etc.
+              </div>
             </div>
 
             <div className="mt-8 flex max-w-2xl gap-10">
@@ -200,7 +202,7 @@ export default function RentPage({ nft }: Props) {
                 >
                   <div className="relative rounded-full bg-white px-8 py-2 text-black">
                     <div className="text-3xl font-bold tracking-wider text-black">
-                      Rent by Duration
+                      Get License by Days
                     </div>
                   </div>
                 </Link>
@@ -217,15 +219,16 @@ export default function RentPage({ nft }: Props) {
 
             <div className="pt-6 opacity-60">Your right with this License</div>
             <div className="text-black">
-              <div>- Allow to use for exhibition, storefront display, etc.</div>
-              <div>- No commercial use for sale</div>
+              <div>
+                Repeated printing use of NFT on a certain type of goods.
+              </div>
             </div>
 
             <div className="mt-8 flex max-w-2xl gap-10">
               <div className="flex flex-col">
                 <div className="opacity-60">Listed Price for Authorization</div>
                 <div className="font-title text-lg font-semibold">
-                  {nft.currentRentalPriceByAmount} USDT/Amount
+                  {nft.currentRentalPriceByAmount} USDT/Piece
                 </div>
               </div>
 
@@ -246,7 +249,7 @@ export default function RentPage({ nft }: Props) {
                 >
                   <div className="relative rounded-full bg-black px-8 py-2">
                     <div className="text-3xl font-bold tracking-wider text-white">
-                      Rent by Quantity
+                      Get License by Quantity
                     </div>
                   </div>
                 </Link>

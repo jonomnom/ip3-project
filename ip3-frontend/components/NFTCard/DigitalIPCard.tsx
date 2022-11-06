@@ -84,7 +84,7 @@ export default function DigitalIPCard({ nft }: Props) {
               )
             }}
           >
-            RENT
+            Get License
           </button>
         </div>
 
