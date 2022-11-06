@@ -88,6 +88,7 @@ const getAllListedRentableNFT = async (req: Request, res: Response) => {
     const allNFTs = await getFirestore()
       .collection(Collections.RENTABLE_NFT)
       .get();
+    console.log(allNFTs);
     return res.status(200).json({
       success: true,
       data: allNFTs.docs.map((item) => {
@@ -139,4 +140,51 @@ const getRentableNFT = async (req: Request, res: Response) => {
   }
 };
 
-export { listNFTForRent, getAllListedRentableNFT, getRentableNFT };
+/**
+ * Get specific rentable NFT by contract and token id.
+ */
+const getRentableNFTByContract = async (req: Request, res: Response) => {
+  try {
+    const { collectionAddress, collectionTokenId } = req.query;
+    if (!isInputDefined([collectionAddress, collectionTokenId])) {
+      return res.status(400).json({
+        success: false,
+        message: "RentableNFT info missing.",
+      });
+    }
+    const snapshot = await getFirestore()
+      .collection(Collections.RENTABLE_NFT)
+      .where(
+        "autorizeIP.collectionAddress",
+        "==",
+        collectionAddress?.toString()
+      )
+      .where(
+        "autorizeIP.collectionTokenId",
+        "==",
+        collectionTokenId?.toString()
+      )
+      .limit(1)
+      .get();
+    return res.status(200).json({
+      success: true,
+      data: snapshot.docs.map((item) => {
+        console.log(item);
+        const data = {
+          id: item.id,
+          ...item.data(),
+        };
+        return data;
+      }),
+    });
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+};
+
+export {
+  listNFTForRent,
+  getAllListedRentableNFT,
+  getRentableNFT,
+  getRentableNFTByContract,
+};
