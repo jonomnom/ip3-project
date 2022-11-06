@@ -19,6 +19,12 @@ interface IERC20 {
     function balanceOf(address account) external returns (uint256);
 }
 
+// PUSH Comm Contract Interface
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
+
+
 /**
  *@title IP3 for lend NFT IP
  *@notice Contract demo
@@ -30,6 +36,7 @@ contract IP3 {
     //////////////////////////////////////////////////////////////*/
 
     IERC20 acceptedUSDT;
+    address public EPNS_COMM_ADDRESS = 0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa;
     mapping(bytes32 => NFTipOverall) authroizeRecordMap; // hash of NFT => record
     mapping(bytes32 => AuthorizeCertificate) authorizeCertificateMap; // hash of AuthorizeCertificate => certificate
     mapping(address => uint256) claimableMap; // address to claim the authroization revenue
@@ -260,6 +267,26 @@ contract IP3 {
 
         // update claimable address
         claimableMap[_authorizedNFT.authorizer.claimAddress] += termedPrice;
+
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            0x66c07c21831af91a47F3447338Dd9D95c97eb9c5, // from channel - recommended to set channel via dApp and put it's value -> then once contract is deployed, go back and add the contract address as delegate for your channel
+            _renterAddress, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(
+                string(
+                    // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                        "+", // segregator
+                        "1", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Tranfer Alert", // this is notificaiton title
+                        "+", // segregator
+                        "Hooray! ", // notification body
+                        "Purchase State has been updated!" // notification body
+                    )
+                )
+            )
+        );
 
         emit Purchased(
             hashedNft,
