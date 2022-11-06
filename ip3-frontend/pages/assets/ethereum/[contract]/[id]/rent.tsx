@@ -166,7 +166,14 @@ export default function RentPage({ nft }: Props) {
       <div className="flex w-full">
         <div className="relative flex min-h-[80vh] w-1/2 flex-col items-end justify-start bg-black pt-10 text-white">
           <div className="max-w-2xl">
-            <DemoSwiper />
+            <DemoSwiper
+              images={[
+                '/demo/1.jpg',
+                '/demo/2.jpg',
+                '/demo/3.jpg',
+                '/demo/4.jpg',
+              ]}
+            />
 
             <div className="pt-6 opacity-60">Your right with this License</div>
             <div className="text-white">
@@ -215,7 +222,14 @@ export default function RentPage({ nft }: Props) {
 
         <div className="relative flex min-h-[80vh] w-1/2 flex-col items-start justify-start bg-white pl-24 pt-10 text-black">
           <div className="max-w-2xl">
-            <DemoSwiper />
+            <DemoSwiper
+              images={[
+                '/demo/5.png',
+                '/demo/6.png',
+                '/demo/7.png',
+                '/demo/8.png',
+              ]}
+            />
 
             <div className="pt-6 opacity-60">Your right with this License</div>
             <div className="text-black">

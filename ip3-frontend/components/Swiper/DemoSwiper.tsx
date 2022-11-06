@@ -6,7 +6,7 @@ import 'swiper/css/effect-cube'
 import 'swiper/css/pagination'
 import { EffectCube, Pagination } from 'swiper'
 
-export default function DemoSwiper() {
+export default function DemoSwiper({ images }: { images: string[] }) {
   return (
     <>
       <Swiper
@@ -24,7 +24,18 @@ export default function DemoSwiper() {
         modules={[EffectCube, Pagination]}
         className="mySwiper"
       >
-        <SwiperSlide>
+        {images.map((image) => (
+          <SwiperSlide key={image}>
+            <img
+              className=" w-96 overflow-hidden rounded-lg object-cover"
+              alt="design"
+              style={{ aspectRatio: '1' }}
+              src={`${image}`}
+            />
+          </SwiperSlide>
+        ))}
+
+        {/* <SwiperSlide>
           <img src="/test1.png" />
         </SwiperSlide>
         <SwiperSlide>
@@ -32,10 +43,7 @@ export default function DemoSwiper() {
         </SwiperSlide>
         <SwiperSlide>
           <img src="/test1.png" />
-        </SwiperSlide>
-        <SwiperSlide>
-          <img src="/test1.png" />
-        </SwiperSlide>
+        </SwiperSlide> */}
       </Swiper>
     </>
   )

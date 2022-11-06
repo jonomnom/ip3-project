@@ -45,12 +45,12 @@ interface Props {
   nfts: NFT[]
 }
 export default function UserProfile({ address, nfts }: Props) {
-  const [hideSelectorTool, setHideSelectorTool] = useState(false)
+  const [hideSelectorTool, setHideSelectorTool] = useState(true)
   console.log(nfts)
   return (
     <div className="w-full pb-10">
       <div className="relative flex w-full flex-col items-center justify-between px-12">
-        <div className="sticky top-14 z-10 w-full">
+        {/* <div className="sticky top-14 z-10 w-full">
           <div className="flex h-12 w-full items-center bg-white shadow-lg">
             <Button
               auto
@@ -59,7 +59,7 @@ export default function UserProfile({ address, nfts }: Props) {
               icon={<Filter2 set="bold" primaryColor="white" />}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="relative z-0 mt-4 flex items-start justify-center gap-8">
           {!hideSelectorTool && (
