@@ -120,11 +120,11 @@ contract IP3 {
 
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-        
+
         // get the current price
         uint256 price = _authorizedNFT.currentPrice;
 
-        // put transfer at the end to prevent the reentry attack 
+        // put transfer at the end to prevent the reentry attack
         if (price == 0) {
             price = 1;
             termedPrice = price;
@@ -134,7 +134,6 @@ contract IP3 {
             price *= 2;
             acceptedUSDT.transferFrom(msg.sender, address(this), price);
         }
-
 
         emit Purchased(
             hashedNft,
@@ -151,7 +150,6 @@ contract IP3 {
         uint256 _endTime,
         address _renterAddress
     ) private {
-     
         // first get approved amount from USDT approve, then can purchase this
         bytes32 hashedAuthorizeNFT = hashAuthorizeNFT(_authorizedNFT);
 
@@ -159,7 +157,7 @@ contract IP3 {
         //https://ethereum.stackexchange.com/questions/1511/how-to-initialize-a-struct
         Term memory newTerm = Term(_startTime, _endTime, 0);
         bytes32 singature = hashedAuthorizeNFT; // TODO: Tempoary set to be hashed NFT
-        
+
         //use IERC20 instance to perform the exchange here
         uint256 termedPrice;
 
@@ -189,12 +187,11 @@ contract IP3 {
 
         // update authorizeCertificateMap
         authorizeCertificateMap[hashedCertificate] = newAuthorizeCertificate;
-        
+
         // get the current price
         uint256 price = _authorizedNFT.currentPrice;
 
-
-        // put transfer at the end to prevent the reentry attack 
+        // put transfer at the end to prevent the reentry attack
         if (price == 0) {
             price = 1;
             termedPrice = price;
@@ -204,7 +201,6 @@ contract IP3 {
             price *= 2;
             acceptedUSDT.transferFrom(msg.sender, address(this), price);
         }
-
 
         emit Purchased(
             hashedNft,
@@ -274,14 +270,20 @@ contract IP3 {
         return authorizeCertificateMap[_hashedCertificate];
     }
 
-    function getCurrentPrice(uint256 _lastActive, uint256 _currentPrice) external view returns(uint256) {
+    function getCurrentPrice(uint256 _lastActive, uint256 _currentPrice)
+        external
+        view
+        returns (uint256)
+    {
         uint256 currentBlockTime = block.timestamp;
-        
-        // decrease by 1 uint a second  until to the floor price of 1, 1 fake usdc = 10**6 
-        uint256 estimatePrice =   _currentPrice.div(currentBlockTime.sub(_lastActive)).mul(1);
+
+        // decrease by 1 uint a second until to the floor price of 1, 1 fake usdc = 10**6
+        uint256 estimatePrice = _currentPrice
+            .div(currentBlockTime.sub(_lastActive))
+            .mul(1);
 
         // 1 erc 20 = 10**6
-        uint256 floorPrice = 1*10**6;
+        uint256 floorPrice = 1 * 10**6;
         return estimatePrice >= floorPrice ? estimatePrice : floorPrice;
     }
 }

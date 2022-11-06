@@ -538,30 +538,30 @@ async function main() {
   const [signer] = await ethers.getSigners();
 
   const erc20_rw = new ethers.Contract(USDCaddress, abi, signer);
-  
+
   // apporve contract address to use this (ip3 contract on goerli: 0xD42B73522614074f65E7146d91D1A100838Bc9E5)
   const ip3Address = "0xD42B73522614074f65E7146d91D1A100838Bc9E5";
-  let approvalTx = await erc20_rw.connect(signer).approve(ip3Address, 10**15); // erc20 
+  let approvalTx = await erc20_rw.connect(signer).approve(ip3Address, 10 ** 15); // erc20 
   await approvalTx.wait();
 
   const ip3Contract = new ethers.Contract(ip3Address, ip3Abi, signer);
   const _rentalType = COUNT_ONLY;
-  const _authorizer = ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5","0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"];
+  const _authorizer = ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"];
   const _listStartTime = 0;
   const _listEndTime = 1;
 
   // purchase certificate
   const _nft = ["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1];
   // const _authorizedNFT = [_nft,_rentalType,_authorizer,_listStartTime,_listEndTime, 10000, 1];
-  const _authorizedNFT = [["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1],1, ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5","0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"],0,1, 10, 1];
+  const _authorizedNFT = [["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1], 1, ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"], 0, 1, 10, 1];
 
-  const _term = [0,0,5];
+  const _term = [0, 0, 5];
   // [["eth", "0x66c07c21831af91a47F3447338Dd9D95c97eb9c5", 1],1, ["0x66c07c21831af91a47F3447338Dd9D95c97eb9c5","0x66c07c21831af91a47F3447338Dd9D95c97eb9c5"],0,1, 10, 1]
   let purchaseTx = await ip3Contract.connect(signer).purchaseAuthorization(_authorizedNFT, _term);
-  let purchaseEvent =  await purchaseTx.wait()
+  let purchaseEvent = await purchaseTx.wait()
 
   console.log("raw event data: ", purchaseEvent);
-  
+
   // event type
   // [ "uint", "tuple(uint256, string)" ]
   console.log("purchase certificate: ", JSON.stringify(purchaseEvent.events[1].data));

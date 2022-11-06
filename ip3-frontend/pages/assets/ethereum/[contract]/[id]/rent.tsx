@@ -185,7 +185,9 @@ export default function RentPage({ nft }: Props) {
               <div className="flex flex-col">
                 <div className="opacity-60">Available Until</div>
                 <div className="font-title text-lg font-semibold">
-                  {nft.authorizerEndTime}
+                  {`${new Date(
+                    nft.authorizerEndTime * 1000
+                  ).toLocaleDateString()}`}
                 </div>
               </div>
             </div>
@@ -230,7 +232,9 @@ export default function RentPage({ nft }: Props) {
               <div className="flex flex-col">
                 <div className="opacity-60">Available Until</div>
                 <div className="font-title text-lg font-semibold">
-                  {nft.authorizerEndTime}
+                  {`${new Date(
+                    nft.authorizerEndTime * 1000
+                  ).toLocaleDateString()}`}
                 </div>
               </div>
             </div>

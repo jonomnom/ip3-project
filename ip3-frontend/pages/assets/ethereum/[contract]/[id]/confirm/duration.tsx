@@ -1,6 +1,6 @@
 import { classNames, parseAddressForShow } from '@lib/utils'
 import { GetServerSidePropsContext } from 'next'
-import React, { PureComponent } from 'react'
+import React, { PureComponent, useState } from 'react'
 import {
   LineChart,
   Line,
@@ -15,6 +15,7 @@ import {
 import axios from 'axios'
 import Layout from '@components/Layout'
 import { ethers } from 'ethers'
+import { useContract, useSigner } from 'wagmi'
 import { ParsedUrlQuery } from 'querystring'
 
 import { DateRangePicker } from 'rsuite'
@@ -27,70 +28,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import DemoSwiper from '@components/Swiper/DemoSwiper'
 import { NFT, RentableNFT } from '../../../../../../constant/types'
+import { erc20Abi, ip3Abi } from '../../../../../../constant/abi'
+import { Loading } from '@nextui-org/react'
+import { getDurationLineChartData, getFirstNDaysPrice } from '@lib/ip3Protocal'
 
 const predefinedRanges = [
   {
     label: 'Next 10 days',
     value: [new Date(), addDays(new Date(), 10)],
     placement: 'left',
-  },
-  {
-    label: 'Next 30 days',
-    value: [new Date(), addDays(new Date(), 30)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 3 months',
-    value: [new Date(), addMonths(new Date(), 3)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 6 months',
-    value: [new Date(), addMonths(new Date(), 6)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 1 year',
-    value: [new Date(), addMonths(new Date(), 12)],
-    placement: 'left',
-  },
-]
-
-const data = [
-  {
-    name: 'Page A',
-    uv: 0,
-    amt: 2400,
-  },
-  {
-    name: 'Page B',
-    uv: 400,
-    amt: 2210,
-  },
-  {
-    name: 'Page C',
-    uv: 700,
-    amt: 2290,
-  },
-  {
-    name: 'Page D',
-    uv: 800,
-    amt: 2000,
-  },
-  {
-    name: 'Page E',
-    uv: 900,
-    amt: 2181,
-  },
-  {
-    name: 'Page F',
-    uv: 950,
-    amt: 2500,
-  },
-  {
-    name: 'Page G',
-    uv: 990,
-    amt: 2100,
   },
 ]
 
@@ -116,22 +62,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let nft = null
   try {
     const response = await axios.get(
-      `${process.env.DOMAIN_URL}/api/nft/getNFTsByCollection`,
+      `${process.env.BACKEND_API_DOMAIN}/${process.env.VERSION}/rentableNFT/nft_info`,
       {
         params: {
-          collection: contract,
-          tokens: id,
+          collectionAddress: contract,
+          collectionTokenId: id,
         },
       }
     )
-    if (
-      response.statusText !== 'OK' ||
-      !response?.data?.success ||
-      response?.data?.tokens?.length === 0
-    ) {
+    if (response.statusText !== 'OK' || !response?.data?.success) {
       return { notFound: true }
     }
-    nft = response?.data?.data?.tokens[0]
+    console.log(response.data)
+    nft = response?.data?.data[0]
   } catch (error) {
     console.error(error)
   }
@@ -145,63 +88,63 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 interface Props {
   // address: string
-  nft: NFT
+  nft: RentableNFT
 }
-
 export default function ConfirmDuration({ nft }: Props) {
   const { address } = useAccount()
-  //   const [hideSelectorTool, setHideSelectorTool] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('')
+  const { data: signer, isError, isLoading } = useSigner()
+  const [startTime, setStartTime] = useState(Math.floor(Date.now() / 1000))
+  const [endTime, setEndTime] = useState(
+    Math.floor(Date.now() / 1000) + 86400 * 10
+  ) // + 10 day
+  const USDCaddress = '0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
+  const erc20_rw = useContract({
+    address: USDCaddress,
+    abi: erc20Abi,
+    signerOrProvider: signer,
+  })
 
-  async function listNewDigitalIP(data: RentableNFT) {
-    const res = await fetch('/api/authorization/list', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          return res.json()
-        } else {
-          console.log('Authorize failed!', res)
-        }
-      })
-      .then((res) => {
-        console.log(res)
-        if (res.success) {
-          alert(
-            `${nft.collectionName} ${nft.collectionTokenId} listed on IP3 successfully!`
-          )
-        } else {
-          alert(res.message)
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-  }
+  async function handlePurchaseLicense() {
+    // const erc20_rw = new ethers.Contract(USDCaddress, abi, signer)
 
-  async function handleList(event: React.MouseEvent<HTMLElement>) {
-    // event.preventDefault()
-    if (!address || !ethers.utils.isAddress(address)) {
-      alert('Please connect your wallet!')
-      return
+    // apporve contract address to use this (ip3 contract on goerli: 0xD42B73522614074f65E7146d91D1A100838Bc9E5)
+    const ip3ContractAddress = '0xD42B73522614074f65E7146d91D1A100838Bc9E5'
+    if (signer) {
+      setLoading(true)
+      setLoadingMessage('Approving ERC20 token...')
+      let approvalTx = await erc20_rw
+        ?.connect(signer)
+        .approve(ip3ContractAddress, 10 ** 15) // erc20
+      await approvalTx.wait()
+      setLoadingMessage('Phurchasing license...')
+      const ip3Contract = new ethers.Contract(
+        ip3ContractAddress,
+        ip3Abi,
+        signer
+      )
+      const _authorizedNFT = [
+        ['eth', '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5', 1],
+        1,
+        [
+          '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5',
+          '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5',
+        ],
+        0,
+        1,
+        10,
+        1,
+      ]
+
+      const _term = [0, 0, 5]
+      let purchaseTx = await ip3Contract
+        .connect(signer)
+        .purchaseAuthorization(_authorizedNFT, _term)
+      let purchaseEvent = await purchaseTx.wait()
+      setLoading(false)
+      setLoadingMessage('')
     }
-    const data = {
-      autorizeIP: nft,
-      authorizer: address,
-      authorizerStartTime: 1667079531,
-      authorizerEndTime: 1669757931,
-      initialRentalPriceByDuration: 1,
-      initialRentalPriceByAmount: 1,
-      signiture: 'xxx',
-      rentalTypes: ['duration', 'amount'],
-      listed: true,
-    }
-    await listNewDigitalIP(data)
-    // window.location.reload()
   }
 
   return (
@@ -214,7 +157,9 @@ export default function ConfirmDuration({ nft }: Props) {
               <LineChart
                 width={500}
                 height={300}
-                data={data}
+                data={getDurationLineChartData(
+                  nft?.currentRentalPriceByDuration ?? 1
+                )}
                 margin={{
                   top: 5,
                   right: 30,
@@ -227,7 +172,7 @@ export default function ConfirmDuration({ nft }: Props) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="price" stroke="#82ca9d" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -236,28 +181,44 @@ export default function ConfirmDuration({ nft }: Props) {
             <div className="flex flex-col">
               <div className="opacity-60">Listed Price for Authorization</div>
               <div className="font-title text-2xl font-semibold">
-                20 USDT/Day
+                {nft.currentRentalPriceByDuration} USDT/Day
               </div>
             </div>
 
             <div className="flex flex-col">
-              <div className="opacity-60">Available Until</div>
-              <div className="font-title text-2xl font-semibold">
-                20 USDT/Day
-              </div>
+              <div className="opacity-60">Select duration</div>
+              <DateRangePicker
+                ranges={predefinedRanges}
+                disabledDate={combine(beforeToday(), allowedMaxDays(11))}
+                placeholder="Duration"
+                style={{ width: 300 }}
+                onChange={(dates) => {
+                  console.log(dates)
+                  if (dates?.length === 2) {
+                    setStartTime(Math.floor(dates[0].getTime() / 1000))
+                    setEndTime(Math.floor(dates[1].getTime() / 1000))
+                  }
+                }}
+              />
             </div>
           </div>
 
           <div className="flex w-full justify-between">
             <div className="flex flex-col">
               <div className="opacity-60">Total Price</div>
-              <div className="font-title text-2xl font-semibold">5000 USDT</div>
+              <div className="font-title text-2xl font-semibold">
+                {getFirstNDaysPrice(
+                  Math.round((endTime - startTime) / 86400),
+                  nft?.currentRentalPriceByDuration ?? 1
+                )}{' '}
+                USDT
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="opacity-60">Total Days</div>
               <div className="font-title text-2xl font-semibold">
-                10 USDT/Day
+                {`${Math.round((endTime - startTime) / 86400)}`} Days
               </div>
             </div>
           </div>
@@ -273,15 +234,25 @@ export default function ConfirmDuration({ nft }: Props) {
           </div>
 
           <div className="flex w-full items-center justify-between">
-            <Link href="#" passHref>
-              <div className="relative rounded-full bg-black px-8 py-2">
-                <div className="font-title text-3xl font-bold tracking-wider text-white">
-                  Get this License
-                </div>
+            <button
+              className="relative rounded-full bg-black px-8 py-2"
+              onClick={() => {
+                handlePurchaseLicense()
+              }}
+            >
+              <div className="font-title text-3xl font-bold tracking-wider text-white">
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loading type="default" /> <span>{loadingMessage}</span>
+                  </div>
+                ) : (
+                  'Get this License'
+                )}
               </div>
-            </Link>
+            </button>
+
             <Link
-              href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/rent`}
+              href={`/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}/rent`}
               passHref
             >
               <div className="relative rounded-full border border-black bg-white px-8 py-2">
