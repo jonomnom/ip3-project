@@ -125,33 +125,36 @@ export default function ConfirmDuration({ nft }: Props) {
         signer
       )
       const _authorizedNFT = [
-        ['eth', '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5', 1],
-        1,
         [
-          '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5',
-          '0x66c07c21831af91a47F3447338Dd9D95c97eb9c5',
-        ],
-        0,
-        1,
-        10,
-        1,
+          nft.autorizeIP.chain,
+          nft.autorizeIP.collectionAddress,
+          nft.autorizeIP.collectionTokenId,
+        ], //nft
+        0, // rentalType
+        [nft.authorizer, nft.authorizer], //authorizer
+        nft.authorizerStartTime,
+        nft.authorizerEndTime,
+        (nft?.currentRentalPriceByDuration ?? 1) * 10 ** 6, //currentPrice
+        Math.floor(Date.now() / 1000), // last active timestamp
       ]
 
-      const _term = [0, 0, 5]
+      const _term = [startTime, endTime, 5]
       let purchaseTx = await ip3Contract
         .connect(signer)
         .purchaseAuthorization(_authorizedNFT, _term)
       let purchaseEvent = await purchaseTx.wait()
       setLoading(false)
       setLoadingMessage('')
+
+      // TODO: update the current duration price
     }
   }
 
   return (
     <div className="relative w-full">
       <Banner title="Confirm" subtitle="Pick your price and date"></Banner>
-      <div className="flex w-full items-center justify-center">
-        <div className="flex w-full max-w-7xl flex-col items-start justify-center gap-8  py-16">
+      <div className="flex w-full items-center justify-center px-8">
+        <div className="flex w-full max-w-7xl flex-col items-start justify-center gap-8 py-16">
           <div className="h-96 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart

@@ -35,15 +35,14 @@ struct Term {
 }
 
 struct AuthorizeCertificate {
-  AuthorizedNFT authorizedNFT;
-  Term term;
-  address renter;
-  uint256 price;
-  bytes32 signature;
+    AuthorizedNFT authorizedNFT;
+    Term term;
+    address renter;
+    uint256 price;
+    bytes32 signature;
 }
 
 struct AuthorizeRecord {
     uint256 totalAuthorizedCount;
     uint256 totalTransactionRevenue;
 }
-
