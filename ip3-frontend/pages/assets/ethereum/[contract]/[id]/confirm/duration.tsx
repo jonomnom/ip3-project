@@ -138,7 +138,7 @@ export default function ConfirmDuration({ nft }: Props) {
         Math.floor(Date.now() / 1000), // last active timestamp
       ]
 
-      const _term = [startTime, endTime, 5]
+      const _term = [startTime, endTime, 0]
       let purchaseTx = await ip3Contract
         .connect(signer)
         .purchaseAuthorization(_authorizedNFT, _term)
@@ -192,6 +192,7 @@ export default function ConfirmDuration({ nft }: Props) {
               <div className="opacity-60">Select duration</div>
               <DateRangePicker
                 ranges={predefinedRanges}
+                showOneCalendar
                 disabledDate={combine(beforeToday(), allowedMaxDays(11))}
                 placeholder="Duration"
                 style={{ width: 300 }}

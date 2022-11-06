@@ -1,19 +1,38 @@
 import { classNames, parseAddressForShow } from '@lib/utils'
 import { GetServerSidePropsContext } from 'next'
-import React, { useEffect, useState } from 'react'
+import React, { PureComponent, useState } from 'react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts'
+
 import axios from 'axios'
 import Layout from '@components/Layout'
 import { ethers } from 'ethers'
+import { useContract, useSigner } from 'wagmi'
 import { ParsedUrlQuery } from 'querystring'
+
 import { DateRangePicker } from 'rsuite'
 import addDays from 'date-fns/addDays'
-import addMonths from 'date-fns/addMonths'
 import 'rsuite/dist/rsuite.css'
 import { useAccount } from 'wagmi'
 import Banner from '@components/Banner'
 import Link from 'next/link'
-import Image from 'next/image'
-import DemoSwiper from '@components/Swiper/DemoSwiper'
+import { RentableNFT } from '../../../../../../constant/types'
+import { erc20Abi, ip3Abi } from '../../../../../../constant/abi'
+import { Input, Loading } from '@nextui-org/react'
+import {
+  getDurationLineChartData,
+  getFirstNDaysPrice,
+  getFirstNQuantityPrice,
+  getQuantityLineChartData,
+} from '@lib/ip3Protocal'
 
 const predefinedRanges = [
   {
@@ -21,36 +40,9 @@ const predefinedRanges = [
     value: [new Date(), addDays(new Date(), 10)],
     placement: 'left',
   },
-  {
-    label: 'Next 30 days',
-    value: [new Date(), addDays(new Date(), 30)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 3 months',
-    value: [new Date(), addMonths(new Date(), 3)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 6 months',
-    value: [new Date(), addMonths(new Date(), 6)],
-    placement: 'left',
-  },
-  {
-    label: 'Next 1 year',
-    value: [new Date(), addMonths(new Date(), 12)],
-    placement: 'left',
-  },
 ]
 
-const {
-  allowedMaxDays,
-  allowedDays,
-  allowedRange,
-  beforeToday,
-  afterToday,
-  combine,
-} = DateRangePicker
+const { allowedMaxDays, beforeToday, afterToday, combine } = DateRangePicker
 
 export interface QParams extends ParsedUrlQuery {
   contract: string
@@ -65,22 +57,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let nft = null
   try {
     const response = await axios.get(
-      `${process.env.DOMAIN_URL}/api/nft/getNFTsByCollection`,
+      `${process.env.BACKEND_API_DOMAIN}/${process.env.VERSION}/rentableNFT/nft_info`,
       {
         params: {
-          collection: contract,
-          tokens: id,
+          collectionAddress: contract,
+          collectionTokenId: id,
         },
       }
     )
-    if (
-      response.statusText !== 'OK' ||
-      !response?.data?.success ||
-      response?.data?.tokens?.length === 0
-    ) {
+    if (response.statusText !== 'OK' || !response?.data?.success) {
       return { notFound: true }
     }
-    nft = response?.data?.data?.tokens[0]
+    console.log(response.data)
+    nft = response?.data?.data[0]
   } catch (error) {
     console.error(error)
   }
@@ -94,69 +83,170 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 interface Props {
   // address: string
-  nft: NFT
+  nft: RentableNFT
 }
-
 export default function ConfirmAmount({ nft }: Props) {
   const { address } = useAccount()
-  //   const [hideSelectorTool, setHideSelectorTool] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('')
+  const { data: signer, isError, isLoading } = useSigner()
+  const [amount, setAmount] = useState('10')
+  const USDCaddress = '0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
+  const erc20_rw = useContract({
+    address: USDCaddress,
+    abi: erc20Abi,
+    signerOrProvider: signer,
+  })
 
-  async function listNewDigitalIP(data: RentableNFT) {
-    const res = await fetch('/api/authorization/list', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          return res.json()
-        } else {
-          console.log('Authorize failed!', res)
-        }
-      })
-      .then((res) => {
-        console.log(res)
-        if (res.success) {
-          alert(
-            `${nft.collectionName} ${nft.collectionTokenId} listed on IP3 successfully!`
-          )
-        } else {
-          alert(res.message)
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-  }
+  async function handlePurchaseLicense() {
+    // const erc20_rw = new ethers.Contract(USDCaddress, abi, signer)
+    // apporve contract address to use this (ip3 contract on goerli: 0xD42B73522614074f65E7146d91D1A100838Bc9E5)
+    const ip3ContractAddress = '0xD42B73522614074f65E7146d91D1A100838Bc9E5'
+    if (signer) {
+      setLoading(true)
+      setLoadingMessage('Approving ERC20 token...')
+      let approvalTx = await erc20_rw
+        ?.connect(signer)
+        .approve(ip3ContractAddress, 10 ** 15) // erc20
+      await approvalTx.wait()
+      setLoadingMessage('Phurchasing license...')
+      const ip3Contract = new ethers.Contract(
+        ip3ContractAddress,
+        ip3Abi,
+        signer
+      )
+      const _authorizedNFT = [
+        [
+          nft.autorizeIP.chain,
+          nft.autorizeIP.collectionAddress,
+          nft.autorizeIP.collectionTokenId,
+        ], //nft
+        0, // rentalType
+        [nft.authorizer, nft.authorizer], //authorizer
+        0,
+        0,
+        (nft?.currentRentalPriceByAmount ?? 1) * 10 ** 6, //currentPrice
+        Math.floor(Date.now() / 1000), // last active timestamp
+      ]
 
-  async function handleList(event: React.MouseEvent<HTMLElement>) {
-    // event.preventDefault()
-    if (!address || !ethers.utils.isAddress(address)) {
-      alert('Please connect your wallet!')
-      return
+      const _term = [0, 0, amount]
+      let purchaseTx = await ip3Contract
+        .connect(signer)
+        .purchaseAuthorization(_authorizedNFT, _term)
+      let purchaseEvent = await purchaseTx.wait()
+      setLoading(false)
+      setLoadingMessage('')
+      // TODO: update the current duration price
     }
-    const data = {
-      autorizeIP: nft,
-      authorizer: address,
-      authorizerStartTime: 1667079531,
-      authorizerEndTime: 1669757931,
-      initialRentalPriceByDuration: 1,
-      initialRentalPriceByAmount: 1,
-      signiture: 'xxx',
-      rentalTypes: ['duration', 'amount'],
-      listed: true,
-    }
-    await listNewDigitalIP(data)
-    // window.location.reload()
   }
 
   return (
     <div className="relative w-full">
-      <Banner title="Confirm" subtitle="Pick your price and date"></Banner>
-      <div className="flex w-full">Hello</div>
+      <Banner
+        title="Licensing by Quantity"
+        subtitle="Pick your price and quantity"
+      ></Banner>
+      <div className="flex w-full items-center justify-center px-8">
+        <div className="flex w-full max-w-7xl flex-col items-start justify-center gap-8 py-16">
+          <div className="h-96 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                width={500}
+                height={300}
+                data={getQuantityLineChartData(
+                  nft?.currentRentalPriceByAmount ?? 1
+                )}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="5 5" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="price" stroke="#82ca9d" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex w-full justify-between">
+            <div className="flex flex-col">
+              <div className="opacity-60">Listed Price for Authorization</div>
+              <div className="font-title text-2xl font-semibold">
+                {nft.currentRentalPriceByAmount} USDT/amount
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <div className="opacity-60">Select amount</div>
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value)
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex w-full justify-between">
+            <div className="flex flex-col">
+              <div className="opacity-60">Total Price</div>
+              <div className="font-title text-2xl font-semibold">
+                {getFirstNQuantityPrice(
+                  Number(amount),
+                  nft?.currentRentalPriceByAmount ?? 1
+                )}{' '}
+                USDT
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full border-t border-black" />
+
+          <div>
+            <div className="pt-6 opacity-60">Your right with this License</div>
+            <div className="text-black">
+              <div>- Allow to use for exhibition, storefront display, etc.</div>
+              <div>- No commercial use for sale</div>
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between">
+            <button
+              className="relative rounded-full bg-black px-8 py-2"
+              onClick={() => {
+                handlePurchaseLicense()
+              }}
+            >
+              <div className="font-title text-3xl font-bold tracking-wider text-white">
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loading type="default" /> <span>{loadingMessage}</span>
+                  </div>
+                ) : (
+                  'Get this License'
+                )}
+              </div>
+            </button>
+
+            <Link
+              href={`/assets/ethereum/${nft.autorizeIP.collectionAddress}/${nft.autorizeIP.collectionTokenId}/rent`}
+              passHref
+            >
+              <div className="relative rounded-full border border-black bg-white px-8 py-2">
+                <div className="font-title text-3xl font-bold tracking-wider text-black">
+                  Back
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

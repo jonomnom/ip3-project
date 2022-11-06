@@ -159,8 +159,8 @@ export default function RentPage({ nft }: Props) {
   return (
     <div className="relative w-full">
       <Banner
-        title="License"
-        subtitle="Get the license fits you best."
+        title="Choose Your License"
+        subtitle="Get the license that fits your best use case."
       ></Banner>
 
       <div className="flex w-full">
@@ -200,7 +200,7 @@ export default function RentPage({ nft }: Props) {
                 >
                   <div className="relative rounded-full bg-white px-8 py-2 text-black">
                     <div className="text-3xl font-bold tracking-wider text-black">
-                      Rent by days
+                      Rent by Duration
                     </div>
                   </div>
                 </Link>
@@ -246,7 +246,7 @@ export default function RentPage({ nft }: Props) {
                 >
                   <div className="relative rounded-full bg-black px-8 py-2">
                     <div className="text-3xl font-bold tracking-wider text-white">
-                      Rent by amounts
+                      Rent by Quantity
                     </div>
                   </div>
                 </Link>
