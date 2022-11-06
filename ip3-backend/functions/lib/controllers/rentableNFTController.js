@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRentableNFT = exports.getAllListedRentableNFT = exports.listNFTForRent = void 0;
+exports.getRentableNFTByContract = exports.getRentableNFT = exports.getAllListedRentableNFT = exports.listNFTForRent = void 0;
 const index_1 = require("../type/index");
 const utils_1 = require("../utils");
 const firestore_1 = require("firebase-admin/firestore");
@@ -77,6 +77,7 @@ const getAllListedRentableNFT = async (req, res) => {
         const allNFTs = await (0, firestore_1.getFirestore)()
             .collection(index_1.Collections.RENTABLE_NFT)
             .get();
+        console.log(allNFTs);
         return res.status(200).json({
             success: true,
             data: allNFTs.docs.map((item) => {
@@ -122,4 +123,36 @@ const getRentableNFT = async (req, res) => {
     }
 };
 exports.getRentableNFT = getRentableNFT;
+/**
+ * Get specific rentable NFT by contract and token id.
+ */
+const getRentableNFTByContract = async (req, res) => {
+    try {
+        const { collectionAddress, collectionTokenId } = req.query;
+        if (!(0, utils_1.isInputDefined)([collectionAddress, collectionTokenId])) {
+            return res.status(400).json({
+                success: false,
+                message: "RentableNFT info missing.",
+            });
+        }
+        const snapshot = await (0, firestore_1.getFirestore)()
+            .collection(index_1.Collections.RENTABLE_NFT)
+            .where("autorizeIP.collectionAddress", "==", collectionAddress === null || collectionAddress === void 0 ? void 0 : collectionAddress.toString())
+            .where("autorizeIP.collectionTokenId", "==", collectionTokenId === null || collectionTokenId === void 0 ? void 0 : collectionTokenId.toString())
+            .limit(1)
+            .get();
+        return res.status(200).json({
+            success: true,
+            data: snapshot.docs.map((item) => {
+                console.log(item);
+                const data = Object.assign({ id: item.id }, item.data());
+                return data;
+            }),
+        });
+    }
+    catch (e) {
+        return res.status(500).send(e);
+    }
+};
+exports.getRentableNFTByContract = getRentableNFTByContract;
 //# sourceMappingURL=rentableNFTController.js.map

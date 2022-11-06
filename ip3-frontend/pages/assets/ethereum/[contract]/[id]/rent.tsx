@@ -71,22 +71,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let nft = null
   try {
     const response = await axios.get(
-      `${process.env.DOMAIN_URL}/api/nft/getNFTsByCollection`,
+      `${process.env.BACKEND_API_DOMAIN}/${process.env.VERSION}/rentableNFT/nft_info`,
       {
         params: {
-          collection: contract,
-          tokens: id,
+          collectionAddress: contract,
+          collectionTokenId: id,
         },
       }
     )
-    if (
-      response.statusText !== 'OK' ||
-      !response?.data?.success ||
-      response?.data?.tokens?.length === 0
-    ) {
+    if (response.statusText !== 'OK' || !response?.data?.success) {
       return { notFound: true }
     }
-    nft = response?.data?.data?.tokens[0]
+    console.log(response.data)
+    nft = response?.data?.data[0]
   } catch (error) {
     console.error(error)
   }
@@ -100,64 +97,64 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 interface Props {
   // address: string
-  nft: NFT
+  nft: RentableNFT
 }
 
 export default function RentPage({ nft }: Props) {
   const { address } = useAccount()
-  //   const [hideSelectorTool, setHideSelectorTool] = useState(false)
+  const [hideSelectorTool, setHideSelectorTool] = useState(false)
 
-  async function listNewDigitalIP(data: RentableNFT) {
-    const res = await fetch('/api/authorization/list', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          return res.json()
-        } else {
-          console.log('Authorize failed!', res)
-        }
-      })
-      .then((res) => {
-        console.log(res)
-        if (res.success) {
-          alert(
-            `${nft.collectionName} ${nft.collectionTokenId} listed on IP3 successfully!`
-          )
-        } else {
-          alert(res.message)
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-  }
+  // async function listNewDigitalIP(data: RentableNFT) {
+  //   const res = await fetch('/api/authorization/list', {
+  //     method: 'POST',
+  //     headers: {
+  //       Accept: 'application/json, text/plain, */*',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(data),
+  //   })
+  //     .then(async (res) => {
+  //       if (res.ok) {
+  //         return res.json()
+  //       } else {
+  //         console.log('Authorize failed!', res)
+  //       }
+  //     })
+  //     .then((res) => {
+  //       console.log(res)
+  //       if (res.success) {
+  //         alert(
+  //           `${nft.collectionName} ${nft.collectionTokenId} listed on IP3 successfully!`
+  //         )
+  //       } else {
+  //         alert(res.message)
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error(err)
+  //     })
+  // }
 
-  async function handleList(event: React.MouseEvent<HTMLElement>) {
-    // event.preventDefault()
-    if (!address || !ethers.utils.isAddress(address)) {
-      alert('Please connect your wallet!')
-      return
-    }
-    const data = {
-      autorizeIP: nft,
-      authorizer: address,
-      authorizerStartTime: 1667079531,
-      authorizerEndTime: 1669757931,
-      initialRentalPriceByDuration: 1,
-      initialRentalPriceByAmount: 1,
-      signiture: 'xxx',
-      rentalTypes: ['duration', 'amount'],
-      listed: true,
-    }
-    await listNewDigitalIP(data)
-    // window.location.reload()
-  }
+  // async function handleList(event: React.MouseEvent<HTMLElement>) {
+  //   // event.preventDefault()
+  //   if (!address || !ethers.utils.isAddress(address)) {
+  //     alert('Please connect your wallet!')
+  //     return
+  //   }
+  //   const data = {
+  //     autorizeIP: nft,
+  //     authorizer: address,
+  //     authorizerStartTime: 1667079531,
+  //     authorizerEndTime: 1669757931,
+  //     initialRentalPriceByDuration: 1,
+  //     initialRentalPriceByAmount: 1,
+  //     signiture: 'xxx',
+  //     rentalTypes: ['duration', 'amount'],
+  //     listed: true,
+  //   }
+  //   await listNewDigitalIP(data)
+  //   // window.location.reload()
+  // }
 
   return (
     <div className="relative w-full">
@@ -181,14 +178,14 @@ export default function RentPage({ nft }: Props) {
               <div className="flex flex-col">
                 <div className="opacity-60">Listed Price for Authorization</div>
                 <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
+                  {nft.currentRentalPriceByDuration} USDT/Day
                 </div>
               </div>
 
               <div className="flex flex-col">
                 <div className="opacity-60">Available Until</div>
                 <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
+                  {nft.authorizerEndTime}
                 </div>
               </div>
             </div>
@@ -196,7 +193,7 @@ export default function RentPage({ nft }: Props) {
             <div className="group relative mt-8 flex max-w-2xl flex-col items-center">
               <div className="relative">
                 <Link
-                  href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/confirm/duration`}
+                  href={`/assets/ethereum/${nft?.autorizeIP?.collectionAddress}/${nft?.autorizeIP?.collectionTokenId}/confirm/duration`}
                   passHref
                 >
                   <div className="relative rounded-full bg-white px-8 py-2 text-black">
@@ -226,14 +223,14 @@ export default function RentPage({ nft }: Props) {
               <div className="flex flex-col">
                 <div className="opacity-60">Listed Price for Authorization</div>
                 <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
+                  {nft.currentRentalPriceByAmount} USDT/Amount
                 </div>
               </div>
 
               <div className="flex flex-col">
                 <div className="opacity-60">Available Until</div>
                 <div className="font-title text-lg font-semibold">
-                  20 USDT/Day
+                  {nft.authorizerEndTime}
                 </div>
               </div>
             </div>
@@ -241,7 +238,7 @@ export default function RentPage({ nft }: Props) {
             <div className="group relative mt-8 flex max-w-2xl flex-col items-center">
               <div className="relative">
                 <Link
-                  href={`/assets/ethereum/${nft.collectionAddress}/${nft.collectionTokenId}/confirm/amount`}
+                  href={`/assets/ethereum/${nft?.autorizeIP.collectionAddress}/${nft?.autorizeIP.collectionTokenId}/confirm/amount`}
                 >
                   <div className="relative rounded-full bg-black px-8 py-2">
                     <div className="text-3xl font-bold tracking-wider text-white">
